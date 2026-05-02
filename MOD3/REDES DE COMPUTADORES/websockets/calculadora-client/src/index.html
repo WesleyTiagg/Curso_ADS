@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora WebSocket</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
+    :root {
+      --bg: #0d0d0d; --surface: #161616; --border: #2a2a2a;
+      --accent: #00ff88; --error: #ff4455; --text: #e8e8e8; --text-dim: #666;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+    header { text-align: center; margin-bottom: 36px; }
+    header h1 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--accent); }
+    header p { color: var(--text-dim); font-size: 0.78rem; margin-top: 6px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 28px; width: 100%; max-width: 520px; }
+    .status-bar { display: flex; align-items: center; gap: 8px; font-size: 0.75rem;
+      color: var(--text-dim); margin-bottom: 24px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--error); transition: background 0.3s; }
+    .status-dot.connected { background: var(--accent); }
+    .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    label { display: block; font-size: 0.7rem; color: var(--text-dim); margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.08em; }
+    input[type="number"] { width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem; padding: 10px 14px; outline: none; transition: border-color 0.2s;
+      -moz-appearance: textfield; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { display: none; }
+    input[type="number"]:focus { border-color: var(--accent); }
+    .ops { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+    .btn-op { border: none; border-radius: 8px; padding: 12px 0; font-family: 'Syne', sans-serif;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer; color: #0d0d0d;
+      transition: opacity 0.15s, transform 0.1s; }
+    .btn-op:hover  { opacity: 0.85; }
+    .btn-op:active { transform: scale(0.96); }
+    [data-op="ADD"] { background: #00ff88; }
+    [data-op="SUB"] { background: #ffbb00; }
+    [data-op="MUL"] { background: #00aaff; }
+    [data-op="DIV"] { background: #ff6644; }
+    .btn-close { width: 100%; background: transparent; border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+    .btn-close:hover { border-color: var(--error); color: var(--error); }
+    .log-wrapper { margin-top: 28px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; width: 100%; max-width: 520px; }
+    .log-header { display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 14px; border-bottom: 1px solid var(--border); }
+    .log-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); }
+    .btn-clear-log { background: none; border: none; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; cursor: pointer; transition: color 0.2s; }
+    .btn-clear-log:hover { color: var(--text); }
+    #log { display: block; padding: 14px; font-size: 0.78rem; line-height: 1.7; color: #aaa;
+      min-height: 180px; max-height: 320px; overflow-y: auto; white-space: pre-wrap; word-break: break-word; }
+    #log::-webkit-scrollbar { width: 4px; }
+    #log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    footer { margin-top: 32px; font-size: 0.68rem; color: var(--text-dim); letter-spacing: 0.06em; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CALC_WS</h1>
+    <p>Mini-protocolo baseado em linhas · WebSocket</p>
+  </header>
+
+  <div class="card">
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Conectando...</span>
+    </div>
+    <div class="inputs">
+      <div>
+        <label for="operador1">Operando 1</label>
+        <input id="operador1" type="number" placeholder="0" step="any" />
+      </div>
+      <div>
+        <label for="operador2">Operando 2</label>
+        <input id="operador2" type="number" placeholder="0" step="any" />
+      </div>
+    </div>
+
+    <!--
+      ✅ SEM onclick inline!
+      client.ts usa addEventListener via data-op para registrar os handlers.
+      Isso resolve o ReferenceError causado pelo escopo isolado de type="module".
+    -->
+    <div class="ops">
+      <button class="btn-op" data-op="ADD">ADD</button>
+      <button class="btn-op" data-op="SUB">SUB</button>
+      <button class="btn-op" data-op="MUL">MUL</button>
+      <button class="btn-op" data-op="DIV">DIV</button>
+    </div>
+    <button class="btn-close" id="btn-encerrar">⏻ Encerrar conexão</button>
+  </div>
+
+  <div class="log-wrapper">
+    <div class="log-header">
+      <span class="log-title">Log de mensagens</span>
+      <button class="btn-clear-log" id="btn-clear">limpar</button>
+    </div>
+    <pre id="log"></pre>
+  </div>
+
+  <footer>ws://localhost:7001 · protocolo linha a linha</footer>
+
+  <script type="module" src="client.ts"></script>
+</body>
+</html>

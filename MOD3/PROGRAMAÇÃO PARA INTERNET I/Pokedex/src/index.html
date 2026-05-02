@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokedex</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap">
+    <link rel="shortcut icon" type="image/png" sizes="96x96" href="imagens/icon-pokebola.png">
+</head>
+<body>
+
+    <div class="container">
+        <div id="boas-vindas">
+            <h1>Seja bem vindo a Pokedex</h1>
+            <p>Digite o nome ou ID do Pokémon que você procura</p>
+        </div>
+
+        <div class="sessao-campo-pesquisa">
+            <input type="text" id="input-pesquisar" placeholder="Nome ou ID do pokemon">
+            <button id="btn-pesquisar">Buscar</button>
+        </div>
+
+        <div id="app">
+            <!-- Mensagens de estado — todas ocultas por padrão -->
+            <div id="mensagem-loading" class="hidden"><p>Carregando…</p></div>
+            <div id="mensagem-erro"    class="hidden"><p>404 NOT FOUND - Pokémon não encontrado!</p></div>
+
+            <!-- Grid de cards -->
+            <div id="lista-cards"></div>
+
+            <!-- Paginação -->
+            <div class="btns-navegacao hidden">
+                <button id="btn-anterior">Anterior</button>
+                <span   id="info-pagina"></span>
+                <button id="btn-proximo">Próxima</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de detalhes -->
+    <div id="modal" class="hidden">
+        <div id="modal-conteudo">
+            <button id="modal-fechar">✕</button>
+            <img id="modal-imagem" src="" alt="">
+            <h2 id="modal-nome"></h2>
+            <p  id="modal-descricao"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

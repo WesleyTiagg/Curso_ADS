@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adivinhador de Palavra</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>Adivinhe a Palavra</h1>
+      <p class="subtitle">Escolha uma coluna por rodada, por 4 rodadas.</p>
+    </header>
+
+    <section class="status-card">
+      <p id="status">Tabela 1 de 4</p>
+      <p id="etapa">Rodada 1 de 4</p>
+    </section>
+
+    <section id="grid" class="grid" aria-label="Tabela de letras"></section>
+
+    <section class="painel">
+      <h2>Histórico das escolhas</h2>
+      <p id="historico">Nenhuma escolha ainda.</p>
+    </section>
+
+    <section class="painel">
+      <h2>Resultado</h2>
+      <p id="resultado">Faça 4 seleções para concluir.</p>
+    </section>
+
+    <button id="reiniciar" type="button">Reiniciar</button>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

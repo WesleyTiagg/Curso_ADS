@@ -1,0 +1,4 @@
+﻿# Ignore package files for useOnlineStatus
+**/useOnlineStatus/package.json
+**/useOnlineStatus/package-lock.json
+**/useOnlineStatus/node_modules/
